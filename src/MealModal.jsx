@@ -28,24 +28,41 @@ export default function MealModal({ open, date, mealSelections, onChange, onClos
                 }}
                 onClick={(e) => e.stopPropagation()}
             >
-                <h4>
+                <h4 style={{ textAlign: 'center', marginBottom: 20 }}>
                     {date}
                 </h4>
-                <form>
+                <form
+                    style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 12,
+                        alignItems: 'center', // Center align items horizontally
+                    }}
+                >
                     {['Lunch', 'Snack', 'Dinner'].map((meal) => (
-                        <div key={meal}>
-                            <label>
-                                <input
-                                    type="checkbox"
-                                    checked={mealSelections[meal]}
-                                    onChange={() => onChange(meal)}
-                                />
-                                {meal}
-                            </label>
-                        </div>
+                        <label
+                            key={meal}
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 8,
+                                minWidth: 120,
+                                fontSize: 16,
+                                fontFamily: 'inherit',
+                                justifyContent: 'center', // Center content in label
+                            }}
+                        >
+                            <input
+                                type="checkbox"
+                                checked={mealSelections[meal]}
+                                onChange={() => onChange(meal)}
+                                style={{ marginRight: 8 }}
+                            />
+                            <span style={{ width: 60, display: 'inline-block', textAlign: 'center' }}>{meal}</span>
+                        </label>
                     ))}
                 </form>
-                <div style={{ marginTop: 16, display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+                <div style={{ marginTop: 24, display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
                     <button onClick={onClose}>Cancel</button>
                     <button onClick={onSave}>Save</button>
                 </div>
