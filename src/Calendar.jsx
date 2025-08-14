@@ -1,7 +1,13 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
+import MealModal from './MealModal';
+import CalendarGrid from './CalendarGrid';
 
 function getDaysInMonth(year, month) {
     return new Date(year, month + 1, 0).getDate();
+}
+
+function getDateKey(year, month, day) {
+    return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 }
 
 export default function Calendar() {
@@ -9,8 +15,25 @@ export default function Calendar() {
     const [currentMonth, setCurrentMonth] = useState(today.getMonth());
     const [currentYear, setCurrentYear] = useState(today.getFullYear());
 
+    // Store selections per day
+    const [selections, setSelections] = useState({});
+    const [selectedDay, setSelectedDay] = useState(null);
+    const [mealSelections, setMealSelections] = useState({
+        Lunch: false,
+        Snack: false,
+        Dinner: false,
+    });
+
     const daysInMonth = getDaysInMonth(currentYear, currentMonth);
     const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+
+    // Memoize days array for performance
+    const days = useMemo(() => {
+        const arr = [];
+        for (let i = 0; i < firstDay; i++) arr.push(null);
+        for (let d = 1; d <= daysInMonth; d++) arr.push(d);
+        return arr;
+    }, [firstDay, daysInMonth]);
 
     const prevMonth = () => {
         setCurrentMonth((m) => (m === 0 ? 11 : m - 1));
@@ -22,9 +45,32 @@ export default function Calendar() {
         if (currentMonth === 11) setCurrentYear((y) => y + 1);
     };
 
-    const days = [];
-    for (let i = 0; i < firstDay; i++) days.push(null);
-    for (let d = 1; d <= daysInMonth; d++) days.push(d);
+    // Modal handlers
+    const openModal = (day) => {
+        setSelectedDay(day);
+        const key = getDateKey(currentYear, currentMonth, day);
+        setMealSelections(selections[key] || { Lunch: false, Snack: false, Dinner: false });
+    };
+
+    const closeModal = () => {
+        setSelectedDay(null);
+    };
+
+    const handleCheckboxChange = (meal) => {
+        setMealSelections((prev) => ({
+            ...prev,
+            [meal]: !prev[meal],
+        }));
+    };
+
+    const handleSave = () => {
+        const key = getDateKey(currentYear, currentMonth, selectedDay);
+        setSelections((prev) => ({
+            ...prev,
+            [key]: mealSelections,
+        }));
+        closeModal();
+    };
 
     return (
         <div style={{ maxWidth: 320, margin: '2rem auto', border: '1px solid #ccc', borderRadius: 8, padding: 16 }}>
@@ -35,18 +81,25 @@ export default function Calendar() {
                 </h3>
                 <button onClick={nextMonth}>&gt;</button>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4, marginTop: 8 }}>
-                {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d) => (
-                    <div key={d} style={{ fontWeight: 'bold', textAlign: 'center' }}>{d}</div>
-                ))}
-                {days.map((d, i) =>
-                    d ? (
-                        <div key={i} style={{ textAlign: 'center', padding: 4 }}>{d}</div>
-                    ) : (
-                        <div key={i}></div>
-                    )
-                )}
-            </div>
+            <CalendarGrid
+                year={currentYear}
+                month={currentMonth}
+                days={days}
+                selections={selections}
+                onDayClick={openModal}
+            />
+            <MealModal
+                open={selectedDay !== null}
+                date={
+                    selectedDay
+                        ? new Date(currentYear, currentMonth, selectedDay).toLocaleDateString()
+                        : ''
+                }
+                mealSelections={mealSelections}
+                onChange={handleCheckboxChange}
+                onClose={closeModal}
+                onSave={handleSave}
+            />
         </div>
     );
 }
