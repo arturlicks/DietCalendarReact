@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import MealModal from './MealModal';
 import CalendarGrid from './CalendarGrid';
 
@@ -10,13 +10,18 @@ function getDateKey(year, month, day) {
     return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 }
 
+const STORAGE_KEY = 'dietCalendarSelections';
+
 export default function Calendar() {
     const today = new Date();
     const [currentMonth, setCurrentMonth] = useState(today.getMonth());
     const [currentYear, setCurrentYear] = useState(today.getFullYear());
 
-    // Store selections per day
-    const [selections, setSelections] = useState({});
+    // Load selections from localStorage
+    const [selections, setSelections] = useState(() => {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        return stored ? JSON.parse(stored) : {};
+    });
     const [selectedDay, setSelectedDay] = useState(null);
     const [mealSelections, setMealSelections] = useState({
         Lunch: false,
@@ -34,6 +39,11 @@ export default function Calendar() {
         for (let d = 1; d <= daysInMonth; d++) arr.push(d);
         return arr;
     }, [firstDay, daysInMonth]);
+
+    // Save selections to localStorage whenever they change
+    useEffect(() => {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(selections));
+    }, [selections]);
 
     const prevMonth = () => {
         setCurrentMonth((m) => (m === 0 ? 11 : m - 1));
