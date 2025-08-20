@@ -19,7 +19,9 @@ export default function CalendarGrid({
             {days.map((d, i) => {
                 if (!d) return <div key={i}></div>;
                 const key = getDateKey(year, month, d);
-                const hasSelection = selections[key] && (selections[key].Lunch || selections[key].Snack || selections[key].Dinner);
+                const sel = selections[key];
+                // All meals checked
+                const allChecked = sel && sel.Lunch && sel.Snack && sel.Dinner;
                 return (
                     <div
                         key={i}
@@ -27,10 +29,10 @@ export default function CalendarGrid({
                             textAlign: 'center',
                             padding: 4,
                             cursor: 'pointer',
-                            background: hasSelection ? '#4caf50' : '#666666ff',
+                            background: allChecked ? '#4caf50' : '#666666ff',
                             borderRadius: 4,
-                            color: hasSelection ? '#fff' : undefined,
-                            border: hasSelection ? '2px solid #388e3c' : undefined,
+                            color: allChecked ? '#fff' : undefined,
+                            border: allChecked ? '2px solid #388e3c' : undefined,
                         }}
                         onClick={() => onDayClick(d)}
                     >
