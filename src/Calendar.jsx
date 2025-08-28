@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import MealModal from './MealModal';
 import CalendarGrid from './CalendarGrid';
+import { supabase } from './supabaseClient';
 
 function getDaysInMonth(year, month) {
     return new Date(year, month + 1, 0).getDate();
@@ -10,18 +11,12 @@ function getDateKey(year, month, day) {
     return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 }
 
-const STORAGE_KEY = 'dietCalendarSelections';
-
 export default function Calendar() {
     const today = new Date();
     const [currentMonth, setCurrentMonth] = useState(today.getMonth());
     const [currentYear, setCurrentYear] = useState(today.getFullYear());
 
-    // Load selections from localStorage
-    const [selections, setSelections] = useState(() => {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        return stored ? JSON.parse(stored) : {};
-    });
+    const [selections, setSelections] = useState({});
     const [selectedDay, setSelectedDay] = useState(null);
     const [mealSelections, setMealSelections] = useState({
         Lunch: false,
@@ -40,10 +35,27 @@ export default function Calendar() {
         return arr;
     }, [firstDay, daysInMonth]);
 
-    // Save selections to localStorage whenever they change
+    // Fetch selections from Supabase on mount
     useEffect(() => {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(selections));
-    }, [selections]);
+        async function fetchSelections() {
+            const { data, error } = await supabase
+                .from('DaysDietFollowed')
+                .select('*');
+            if (!error && data) {
+                // Convert array to object keyed by date_key
+                const obj = {};
+                data.forEach(row => {
+                    obj[row.date_key] = {
+                        Lunch: row.lunch,
+                        Snack: row.snack,
+                        Dinner: row.dinner,
+                    };
+                });
+                setSelections(obj);
+            }
+        }
+        fetchSelections();
+    }, []);
 
     const prevMonth = () => {
         setCurrentMonth((m) => (m === 0 ? 11 : m - 1));
@@ -73,12 +85,25 @@ export default function Calendar() {
         }));
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
         const key = getDateKey(currentYear, currentMonth, selectedDay);
-        setSelections((prev) => ({
-            ...prev,
-            [key]: mealSelections,
-        }));
+        // Upsert (insert or update) the selection in Supabase
+        const { error } = await supabase
+            .from('DaysDietFollowed')
+            .upsert([
+                {
+                    date_key: key,
+                    lunch: mealSelections.Lunch,
+                    snack: mealSelections.Snack,
+                    dinner: mealSelections.Dinner,
+                }
+            ], { onConflict: ['date_key'] });
+        if (!error) {
+            setSelections((prev) => ({
+                ...prev,
+                [key]: mealSelections,
+            }));
+        }
         closeModal();
     };
 
