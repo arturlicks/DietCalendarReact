@@ -20,8 +20,25 @@ export default function CalendarGrid({
                 if (!d) return <div key={i}></div>;
                 const key = getDateKey(year, month, d);
                 const sel = selections[key];
-                // All meals checked
-                const allChecked = sel && sel.Lunch && sel.Snack && sel.Dinner;
+                // How many meals checked
+                const lunchChecked = sel && sel.Lunch;
+                const snackChecked = sel && sel.Snack;
+                const dinnerChecked = sel && sel.Dinner;
+                const allChecked = lunchChecked && snackChecked && dinnerChecked;
+                const noneChecked = !lunchChecked && !snackChecked && !dinnerChecked;
+                const someChecked = !allChecked && !noneChecked && (lunchChecked || snackChecked || dinnerChecked);
+                let background = '#666666ff';
+                let color = undefined;
+                let border = undefined;
+                if (allChecked) {
+                    background = '#4caf50'; // all checked (green)
+                    color = '#fff';
+                    border = '2px solid #388e3c';
+                } else if (someChecked) {
+                    background = '#ffd600'; // some checked (yellow)
+                    color = '#222';
+                    border = '2px solid #ffea00';
+                }
                 return (
                     <div
                         key={i}
@@ -29,10 +46,10 @@ export default function CalendarGrid({
                             textAlign: 'center',
                             padding: 4,
                             cursor: 'pointer',
-                            background: allChecked ? '#4caf50' : '#666666ff',
+                            background,
                             borderRadius: 4,
-                            color: allChecked ? '#fff' : undefined,
-                            border: allChecked ? '2px solid #388e3c' : undefined,
+                            color,
+                            border,
                         }}
                         onClick={() => onDayClick(d)}
                     >
