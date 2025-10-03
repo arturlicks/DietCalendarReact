@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import MealModal from './MealModal';
 import CalendarGrid from './CalendarGrid';
+import Report from './Report';
 import { supabase } from './supabaseClient';
 
 function getDaysInMonth(year, month) {
@@ -27,13 +28,15 @@ export default function Calendar() {
     const daysInMonth = getDaysInMonth(currentYear, currentMonth);
     const firstDay = new Date(currentYear, currentMonth, 1).getDay();
 
-    // Memoize days array for performance
+    // Memoize days array for performance. Each slot is an object with a stable id.
     const days = useMemo(() => {
         const arr = [];
-        for (let i = 0; i < firstDay; i++) arr.push(null);
-        for (let d = 1; d <= daysInMonth; d++) arr.push(d);
+        for (let i = 0; i < firstDay; i++) arr.push({ id: `empty-${currentYear}-${currentMonth}-${i}` });
+        for (let d = 1; d <= daysInMonth; d++) {
+            arr.push({ id: getDateKey(currentYear, currentMonth, d), day: d });
+        }
         return arr;
-    }, [firstDay, daysInMonth]);
+    }, [firstDay, daysInMonth, currentYear, currentMonth]);
 
     // Fetch selections from Supabase on mount
     useEffect(() => {
@@ -122,6 +125,12 @@ export default function Calendar() {
                 days={days}
                 selections={selections}
                 onDayClick={openModal}
+            />
+            <Report
+                year={currentYear}
+                month={currentMonth}
+                daysInMonth={daysInMonth}
+                selections={selections}
             />
             <MealModal
                 open={selectedDay !== null}
