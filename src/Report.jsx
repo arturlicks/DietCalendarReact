@@ -30,7 +30,7 @@ export default function Report({ year, month, daysInMonth, selections }) {
     const percent = total === 0 ? 0 : Math.round((completedDays / total) * 100);
 
     return (
-        <div style={{ marginTop: 16, padding: 12, background: '#f5f5f5', borderRadius: 6 }}>
+        <div style={{ marginTop: 16, padding: 12, background: '#222', borderRadius: 6 }}>
             <h4 style={{ margin: '0 0 8px 0' }}>Monthly Report</h4>
             <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
                 <div style={{ minWidth: 140 }}>
