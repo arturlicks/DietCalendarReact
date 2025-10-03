@@ -85,5 +85,3 @@ export default function MealModal({ open, date, mealSelections, onChange, onClos
         </div>
     );
 }
-
-// PropTypes removed intentionally
