@@ -1,12 +1,7 @@
 import React from 'react';
-
-function getDateKey(year, month, day) {
-    return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-}
+import PropTypes from 'prop-types';
 
 export default function CalendarGrid({
-    year,
-    month,
     days,
     selections,
     onDayClick,
@@ -16,20 +11,21 @@ export default function CalendarGrid({
             {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d) => (
                 <div key={d} style={{ fontWeight: 'bold', textAlign: 'center' }}>{d}</div>
             ))}
-            {days.map((d, i) => {
-                if (!d) return <div key={i}></div>;
-                const key = getDateKey(year, month, d);
-                const sel = selections[key];
+            {days.map((slot) => {
+                if (!slot.day) return <div key={slot.id} />;
+                const d = slot.day;
+                const key = slot.id; // already a date key
+                const sel = selections?.[key];
                 // How many meals checked
-                const lunchChecked = sel && sel.Lunch;
-                const snackChecked = sel && sel.Snack;
-                const dinnerChecked = sel && sel.Dinner;
+                const lunchChecked = !!sel?.Lunch;
+                const snackChecked = !!sel?.Snack;
+                const dinnerChecked = !!sel?.Dinner;
                 const allChecked = lunchChecked && snackChecked && dinnerChecked;
                 const noneChecked = !lunchChecked && !snackChecked && !dinnerChecked;
                 const someChecked = !allChecked && !noneChecked && (lunchChecked || snackChecked || dinnerChecked);
                 let background = '#666666ff';
-                let color = undefined;
-                let border = undefined;
+                let color;
+                let border;
                 if (allChecked) {
                     background = '#4caf50'; // all checked (green)
                     color = '#fff';
@@ -40,8 +36,10 @@ export default function CalendarGrid({
                     border = '2px solid #ffea00';
                 }
                 return (
-                    <div
-                        key={i}
+                    <button
+                        key={key}
+                        type="button"
+                        onClick={() => onDayClick(d)}
                         style={{
                             textAlign: 'center',
                             padding: 4,
@@ -50,13 +48,20 @@ export default function CalendarGrid({
                             borderRadius: 4,
                             color,
                             border,
+                            borderStyle: 'none',
                         }}
-                        onClick={() => onDayClick(d)}
+                        aria-label={`Day ${d}`}
                     >
                         {d}
-                    </div>
+                    </button>
                 );
             })}
         </div>
     );
 }
+
+CalendarGrid.propTypes = {
+    days: PropTypes.array.isRequired,
+    selections: PropTypes.object,
+    onDayClick: PropTypes.func.isRequired,
+};

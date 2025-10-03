@@ -1,9 +1,24 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import PropTypes from 'prop-types';
 
 export default function MealModal({ open, date, mealSelections, onChange, onClose, onSave }) {
+    useEffect(() => {
+        function onKey(e) {
+            if (e.key === 'Escape') onClose();
+        }
+        if (open) {
+            window.addEventListener('keydown', onKey);
+            return () => window.removeEventListener('keydown', onKey);
+        }
+        return undefined;
+    }, [open, onClose]);
+
     if (!open) return null;
     return (
         <div
+            role="dialog"
+            aria-modal="true"
+            tabIndex={-1}
             style={{
                 position: 'fixed',
                 top: 0,
@@ -19,6 +34,7 @@ export default function MealModal({ open, date, mealSelections, onChange, onClos
             onClick={onClose}
         >
             <div
+                role="document"
                 style={{
                     background: '#555',
                     padding: 24,
@@ -54,7 +70,7 @@ export default function MealModal({ open, date, mealSelections, onChange, onClos
                         >
                             <input
                                 type="checkbox"
-                                checked={mealSelections[meal]}
+                                checked={!!mealSelections[meal]}
                                 onChange={() => onChange(meal)}
                                 style={{ marginRight: 8 }}
                             />
@@ -70,3 +86,12 @@ export default function MealModal({ open, date, mealSelections, onChange, onClos
         </div>
     );
 }
+
+MealModal.propTypes = {
+    open: PropTypes.bool.isRequired,
+    date: PropTypes.string,
+    mealSelections: PropTypes.object.isRequired,
+    onChange: PropTypes.func.isRequired,
+    onClose: PropTypes.func.isRequired,
+    onSave: PropTypes.func.isRequired,
+};
