@@ -1,5 +1,4 @@
 import React, { useMemo } from 'react';
-import PropTypes from 'prop-types';
 
 function getDateKey(year, month, day) {
     return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
@@ -59,16 +58,5 @@ export default function Report({ year, month, daysInMonth, selections }) {
     );
 }
 
-Report.propTypes = {
-    year: PropTypes.number.isRequired,
-    month: PropTypes.number.isRequired,
-    daysInMonth: PropTypes.number.isRequired,
-    selections: PropTypes.objectOf(
-        PropTypes.shape({
-            Lunch: PropTypes.bool,
-            Snack: PropTypes.bool,
-            Dinner: PropTypes.bool,
-        })
-    ).isRequired,
-};
+// PropTypes removed intentionally
 

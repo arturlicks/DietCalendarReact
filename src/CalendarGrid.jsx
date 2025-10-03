@@ -1,5 +1,4 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 
 export default function CalendarGrid({
     days,
@@ -60,8 +59,4 @@ export default function CalendarGrid({
     );
 }
 
-CalendarGrid.propTypes = {
-    days: PropTypes.array.isRequired,
-    selections: PropTypes.object,
-    onDayClick: PropTypes.func.isRequired,
-};
+// PropTypes removed intentionally
