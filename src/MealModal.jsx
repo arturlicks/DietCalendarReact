@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react';
-import PropTypes from 'prop-types';
 
 export default function MealModal({ open, date, mealSelections, onChange, onClose, onSave }) {
     useEffect(() => {
@@ -87,11 +86,4 @@ export default function MealModal({ open, date, mealSelections, onChange, onClos
     );
 }
 
-MealModal.propTypes = {
-    open: PropTypes.bool.isRequired,
-    date: PropTypes.string,
-    mealSelections: PropTypes.object.isRequired,
-    onChange: PropTypes.func.isRequired,
-    onClose: PropTypes.func.isRequired,
-    onSave: PropTypes.func.isRequired,
-};
+// PropTypes removed intentionally
